@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ labels.app_name }} - Result</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <header class="top">
+    <h1>{{ labels.app_name }}</h1>
+    <p class="tagline">{{ labels.tagline }}</p>
+  </header>
+
+  <div class="container result-container">
+
+    <div class="action-buttons">
+      <button onclick="speakPolicy()" class="btn-secondary" id="speakBtn">Listen</button>
+      <button onclick="window.print()" class="btn-secondary">Save as PDF / Print</button>
+    </div>
+
+    <div class="top-section">
+      <div class="result-card simple-explanation-card" style="margin-bottom: 0;">
+        <h2>{{ labels.simple_explanation }}</h2>
+        <p>{{ result.simple_explanation }}</p>
+      </div>
+
+      <div class="eligibility-card">
+        <h2>{{ labels.eligibility_title }}</h2>
+        
+        <div class="form-group">
+          <label>{{ labels.farmer_cat }}</label>
+          <select id="farmerType">
+            <option value="marginal">{{ labels.cat_marginal }}</option>
+            <option value="small">{{ labels.cat_small }}</option>
+            <option value="large">{{ labels.cat_large }}</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>{{ labels.land_records }}</label>
+          <select id="landRecords"><option value="yes">{{ labels.yes }}</option><option value="no">{{ labels.no }}</option></select>
+        </div>
+        
+        <div class="form-group">
+          <label>{{ labels.bank_acc }}</label>
+          <select id="bankAcc"><option value="yes">{{ labels.yes }}</option><option value="no">{{ labels.no }}</option></select>
+        </div>
+        
+        <button class="check-btn" onclick="checkEligibility()">{{ labels.check_btn }}</button>
+        <div id="eligibility-result"></div>
+      </div>
+    </div>
+
+    <div class="results-grid">
+
+    <div class="result-card">
+      <h2>{{ labels.who_can_apply }}</h2>
+      <ul>
+        {% for line in result.sections.who_can_apply %}
+          <li>{{ line }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="result-card">
+      <h2>{{ labels.benefits }}</h2>
+      <ul>
+        {% for line in result.sections.benefits %}
+          <li>{{ line }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="result-card">
+      <h2>{{ labels.documents }}</h2>
+      <ul>
+        {% for line in result.sections.documents %}
+          <li>{{ line }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="result-card">
+      <h2>{{ labels.how_to_apply }}</h2>
+      <ul>
+        {% for line in result.sections.how_to_apply %}
+          <li>{{ line }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="result-card">
+      <h2>{{ labels.dates }}</h2>
+      <ul>
+        {% for line in result.sections.dates %}
+          <li>{{ line }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="result-card">
+      <h2>{{ labels.conditions }}</h2>
+      <ul>
+        {% for line in result.sections.conditions %}
+          <li>{{ line }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="result-card">
+      <h2>{{ labels.exclusions }}</h2>
+      <ul>
+        {% for line in result.sections.exclusions %}
+          <li>{{ line }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="result-card">
+      <h2>{{ labels.verification }}</h2>
+      <ul>
+        {% for line in result.sections.verification %}
+          <li>{{ line }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="result-card">
+      <h2>{{ labels.payment_method }}</h2>
+      <ul>
+        {% for line in result.sections.payment_method %}
+          <li>{{ line }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="result-card">
+      <h2>{{ labels.grievance }}</h2>
+      <ul>
+        {% for line in result.sections.grievance %}
+          <li>{{ line }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    </div>
+
+    <div style="text-align: center;">
+      <a class="back-link" href="/">&larr; Analyze another policy</a>
+    </div>
+    <footer class="note">Generated automatically from your uploaded document. Always confirm details with the official scheme office.</footer>
+  </div>
+
+  <script>
+    // Infer the language from the labels (if the app_name is Marathi, we use mr-IN)
+    const policyLanguage = "{{ labels.app_name }}" === "कृषी सरळ" ? "mr-IN" : "en-IN";
+    
+    function speakPolicy() {
+      if (!('speechSynthesis' in window)) {
+        alert("Sorry, your browser doesn't support text-to-speech!");
+        return;
+      }
+      
+      const synth = window.speechSynthesis;
+      const btn = document.getElementById('speakBtn');
+      
+      if (synth.speaking) {
+        synth.cancel(); // Stop if already playing
+        btn.innerText = "Listen";
+        return;
+      }
+      
+      // Gather all text from cards
+      let textToRead = "";
+      document.querySelectorAll('.result-card').forEach(card => {
+        textToRead += card.innerText + ". ";
+      });
+      
+      const utterance = new SpeechSynthesisUtterance(textToRead);
+      utterance.lang = policyLanguage;
+      utterance.rate = 0.9; // Slightly slower for clarity
+      
+      utterance.onend = function() {
+        btn.innerText = "Listen";
+      };
+      
+      btn.innerText = "Stop Listening";
+      synth.speak(utterance);
+    }
+    
+    function checkEligibility() {
+      const fType = document.getElementById('farmerType').value;
+      const land = document.getElementById('landRecords').value;
+      const bank = document.getElementById('bankAcc').value;
+      
+      const resDiv = document.getElementById('eligibility-result');
+      resDiv.style.display = 'block';
+      resDiv.className = ''; // reset classes
+      
+      const whoCanApplyText = `{{ " ".join(result.who_can_apply) | lower }}`;
+      const conditionsText = `{{ " ".join(result.conditions) | lower }}`;
+      const combinedRules = whoCanApplyText + " " + conditionsText;
+      
+      if (land === 'no' || bank === 'no') {
+        resDiv.classList.add('result-danger');
+        resDiv.innerHTML = policyLanguage === 'mr-IN' 
+          ? "❌ <strong>अपात्र:</strong> सरकारी योजनांसाठी वैध जमिनीचा दाखला आणि आधार-संलग्न बँक खाते अनिवार्य आहे."
+          : "❌ <strong>Not Eligible:</strong> Valid land records and an Aadhaar-linked bank account are strictly mandatory for almost all government schemes.";
+        return;
+      }
+      
+      // Check if policy restricts to small/marginal
+      const targetsSmallMarginal = combinedRules.includes("small") || combinedRules.includes("marginal") || combinedRules.includes("अल्प");
+      
+      if (targetsSmallMarginal && fType === 'large') {
+        resDiv.classList.add('result-warning');
+        resDiv.innerHTML = policyLanguage === 'mr-IN'
+          ? "⚠️ <strong>कमी शक्यता:</strong> या योजनेत अल्प आणि अत्यल्प भूधारकांना प्राधान्य दिले जाते. मोठ्या शेतकऱ्यांना लाभ मिळण्याची शक्यता कमी आहे."
+          : "⚠️ <strong>Low Chance:</strong> This specific policy prioritizes Small and Marginal farmers. Large farmers may not be covered.";
+        return;
+      }
+      
+      resDiv.classList.add('result-success');
+      resDiv.innerHTML = policyLanguage === 'mr-IN'
+        ? "✅ <strong>उच्च शक्यता:</strong> तुम्ही प्राथमिक अटी पूर्ण करता! अधिक माहितीसाठी 'अर्ज कसा करावा' विभाग वाचा."
+        : "✅ <strong>Highly Likely:</strong> You meet the primary criteria! Please read the 'How to Apply' section to proceed.";
+    }
+  </script>
+</body>
+</html>

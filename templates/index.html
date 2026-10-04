@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Krishi Saral</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+</head>
+<body>
+  <header class="top">
+    <h1>{{ labels.app_name }}</h1>
+    <p class="tagline">{{ labels.tagline }}</p>
+  </header>
+
+  <div class="container">
+    <p class="description">
+      Upload a government agricultural policy and understand it in simple language.
+    </p>
+
+    {% if error %}
+      <div class="error-box">{{ error }}</div>
+    {% endif %}
+
+    <form action="/analyze" method="POST" enctype="multipart/form-data">
+
+      <div class="card">
+        <p class="option-title">Upload Policy PDF</p>
+        <input type="file" name="policy_pdf" accept="application/pdf" />
+      </div>
+
+      <div class="divider">— OR —</div>
+
+      <div class="card">
+        <p class="option-title">Paste Policy Text</p>
+        <textarea name="policy_text" placeholder="Paste the policy text here..."></textarea>
+      </div>
+
+      <div class="language-select">
+        <label>
+          <input type="radio" name="language" value="English" checked />
+          <span>English</span>
+        </label>
+        <label>
+          <input type="radio" name="language" value="Marathi" />
+          <span>मराठी</span>
+        </label>
+      </div>
+
+      <button type="submit" class="big-button">Analyze Policy</button>
+    </form>
+
+    <footer class="note">No login required. Your document is only used to generate this explanation.</footer>
+  </div>
+</body>
+</html>
