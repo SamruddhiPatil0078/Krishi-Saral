@@ -278,7 +278,7 @@
         </div>
 
 
-        <form action="/analyze" method="POST" enctype="multipart/form-data">
+        <form id="analyzeForm" action="/analyze" method="POST" enctype="multipart/form-data">
 
             <div class="form-card">
 
@@ -361,6 +361,295 @@
             </div>
 
         </form>
+
+        <style>
+            /* Premium Aesthetic Styles for Analysis Results */
+            @keyframes slideUpFade {
+                0% { opacity: 0; transform: translateY(30px) scale(0.98); }
+                100% { opacity: 1; transform: translateY(0) scale(1); }
+            }
+
+            .premium-result-container {
+                margin-top: 40px;
+                animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            }
+
+            .premium-summary-card {
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(245, 253, 248, 0.8));
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border: 1px solid rgba(22, 78, 45, 0.15);
+                border-radius: 16px;
+                padding: 30px;
+                box-shadow: 0 12px 32px rgba(22, 78, 45, 0.08), 0 2px 8px rgba(0,0,0,0.03);
+                margin-bottom: 35px;
+                position: relative;
+                overflow: hidden;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+
+            .premium-summary-card:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 16px 40px rgba(22, 78, 45, 0.12), 0 4px 12px rgba(0,0,0,0.04);
+            }
+
+            .premium-summary-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 6px;
+                height: 100%;
+                background: linear-gradient(to bottom, #164e2d, #388e3c);
+            }
+
+            .premium-summary-card h3 {
+                color: #164e2d;
+                font-size: 1.4rem;
+                margin-bottom: 12px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .premium-summary-card h3::before {
+                content: '✨';
+                font-size: 1.2rem;
+            }
+
+            .premium-summary-card p {
+                font-size: 1.15rem;
+                line-height: 1.7;
+                color: #243329;
+                font-weight: 500;
+            }
+
+            .premium-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 24px;
+            }
+
+            .premium-card {
+                background: #ffffff;
+                border-radius: 14px;
+                padding: 24px;
+                border: 1px solid rgba(0,0,0,0.04);
+                box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+                transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .premium-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 12px 24px rgba(22, 78, 45, 0.1);
+                border-color: rgba(22, 78, 45, 0.15);
+            }
+
+            .premium-card-icon {
+                font-size: 28px;
+                background: #f0f7f2;
+                width: 50px;
+                height: 50px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 12px;
+                margin-bottom: 4px;
+            }
+
+            .premium-card h3 {
+                color: #164e2d;
+                font-size: 1.2rem;
+                border-bottom: 2px solid #f0f7f2;
+                padding-bottom: 8px;
+            }
+
+            .premium-list {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+            }
+
+            .premium-list li {
+                position: relative;
+                padding-left: 24px;
+                margin-bottom: 10px;
+                line-height: 1.5;
+                color: #3b4d42;
+            }
+
+            .premium-list li::before {
+                content: '→';
+                position: absolute;
+                left: 0;
+                top: 0;
+                color: #388e3c;
+                font-weight: bold;
+            }
+
+            .premium-empty {
+                color: #7b8e81;
+                font-style: italic;
+                padding: 10px 0;
+            }
+
+            .action-buttons-container {
+                display: flex;
+                gap: 12px;
+                align-items: center;
+            }
+
+            .premium-action-btn {
+                background: white;
+                border: 1px solid #164e2d;
+                color: #164e2d;
+                padding: 8px 16px;
+                border-radius: 20px;
+                font-weight: 600;
+                font-size: 0.9rem;
+                cursor: pointer;
+                transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .premium-action-btn:hover {
+                background: #f0f7f2;
+                box-shadow: 0 4px 8px rgba(22, 78, 45, 0.1);
+            }
+
+            .top-summary-grid {
+                display: grid;
+                grid-template-columns: 2fr 1fr;
+                gap: 24px;
+                margin-bottom: 35px;
+            }
+
+            @media (max-width: 900px) {
+                .top-summary-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            .eligibility-card {
+                background: #f0f7f2;
+                border: 1px solid rgba(22, 78, 45, 0.2);
+                border-radius: 16px;
+                padding: 24px;
+                box-shadow: 0 4px 12px rgba(22, 78, 45, 0.05);
+            }
+
+            .eligibility-card h3 {
+                color: #164e2d;
+                font-size: 1.25rem;
+                margin-bottom: 16px;
+            }
+
+            .eligibility-card .form-group {
+                margin-bottom: 12px;
+            }
+
+            .eligibility-card label {
+                display: block;
+                font-size: 0.9rem;
+                font-weight: 600;
+                color: #243329;
+                margin-bottom: 4px;
+            }
+
+            .eligibility-card select {
+                width: 100%;
+                padding: 8px 12px;
+                border-radius: 8px;
+                border: 1px solid #ccc;
+                font-size: 0.95rem;
+            }
+
+            .check-btn {
+                width: 100%;
+                background: #164e2d;
+                color: white;
+                border: none;
+                padding: 12px;
+                border-radius: 8px;
+                font-size: 1rem;
+                font-weight: 700;
+                cursor: pointer;
+                margin-top: 10px;
+                transition: background 0.2s;
+            }
+
+            .check-btn:hover {
+                background: #0f361f;
+            }
+
+            #eligibility-result {
+                margin-top: 15px;
+                padding: 12px;
+                border-radius: 8px;
+                font-size: 0.95rem;
+                display: none;
+            }
+
+            .result-success { background: #e6f4ea; color: #137333; border: 1px solid #ceead6; }
+            .result-warning { background: #fef7e0; color: #b06000; border: 1px solid #feefc3; }
+            .result-danger { background: #fce8e6; color: #c5221f; border: 1px solid #fad2cf; }
+
+        </style>
+
+        <div id="analyzeResultArea" class="premium-result-container" style="display: none;">
+            <div class="section-heading" style="margin-bottom: 25px; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 15px;">
+                <div>
+                    <span style="color: #388e3c; font-weight: 700; letter-spacing: 1px;">ANALYSIS COMPLETE</span>
+                    <h2 id="inline-summary-title" style="font-size: 2.2rem; color: #164e2d;">Policy Summary</h2>
+                </div>
+                <div class="action-buttons-container">
+                    <button class="premium-action-btn" id="speakBtn" onclick="speakInlinePolicy()">
+                        🔊 <span>Listen</span>
+                    </button>
+                    <button class="premium-action-btn" onclick="window.print()">
+                        🖨️ <span>Save as PDF / Print</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="top-summary-grid">
+                <div class="premium-summary-card" style="margin-bottom: 0;">
+                    <h3 id="inline-simple-exp-title">Simple Explanation</h3>
+                    <p id="inline-simple-explanation"></p>
+                </div>
+
+                <div class="eligibility-card">
+                    <h3 id="inline-elig-title">Quick Eligibility Check</h3>
+                    <div class="form-group">
+                        <label>Farmer Category</label>
+                        <select id="farmerType">
+                            <option value="marginal">Marginal (Up to 1 Hectare)</option>
+                            <option value="small">Small (1 to 2 Hectares)</option>
+                            <option value="large">Large (More than 2 Hectares)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Valid Land Records?</label>
+                        <select id="landRecords"><option value="yes">Yes</option><option value="no">No</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Aadhaar-linked Bank Account?</label>
+                        <select id="bankAcc"><option value="yes">Yes</option><option value="no">No</option></select>
+                    </div>
+                    <button id="inline-btn-check" class="check-btn" onclick="checkInlineEligibility()">Check My Status</button>
+                    <div id="eligibility-result"></div>
+                </div>
+            </div>
+
+            <div class="premium-grid" id="inline-insight-grid">
+                <!-- Dynamic cards will be injected here -->
+            </div>
+        </div>
 
     </section>
 
@@ -570,37 +859,37 @@
             <div class="insight-card">
                 <span>👨‍🌾</span>
                 <h3>Who Can Apply?</h3>
-                <p>Not analyzed yet.</p>
+                <p id="insight-who">Not analyzed yet.</p>
             </div>
 
             <div class="insight-card">
                 <span>💰</span>
                 <h3>Financial Benefit</h3>
-                <p>Not analyzed yet.</p>
+                <p id="insight-benefits">Not analyzed yet.</p>
             </div>
 
             <div class="insight-card">
                 <span>📅</span>
                 <h3>Important Dates</h3>
-                <p>Not analyzed yet.</p>
+                <p id="insight-dates">Not analyzed yet.</p>
             </div>
 
             <div class="insight-card">
                 <span>📑</span>
                 <h3>Required Documents</h3>
-                <p>Not analyzed yet.</p>
+                <p id="insight-documents">Not analyzed yet.</p>
             </div>
 
             <div class="insight-card">
                 <span>📝</span>
                 <h3>Application Method</h3>
-                <p>Not analyzed yet.</p>
+                <p id="insight-method">Not analyzed yet.</p>
             </div>
 
             <div class="insight-card">
                 <span>⚠️</span>
                 <h3>Important Conditions</h3>
-                <p>Not analyzed yet.</p>
+                <p id="insight-conditions">Not analyzed yet.</p>
             </div>
 
         </div>
@@ -1000,6 +1289,201 @@ function changeLanguage(language) {
 
     }
 
+}
+
+/* ============================================
+   API INTEGRATION FOR POLICY ANALYSIS
+   ============================================ */
+
+const analyzeForm = document.getElementById("analyzeForm");
+if (analyzeForm) {
+    analyzeForm.addEventListener("submit", async function(e) {
+        e.preventDefault();
+        
+        const submitBtn = this.querySelector(".analyze-btn");
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = "⏳ Analyzing...";
+        submitBtn.disabled = true;
+
+        try {
+            const formData = new FormData(this);
+            const response = await fetch("/api/analyze", {
+                method: "POST",
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (!response.ok) {
+                alert("Error: " + (data.error || "Failed to analyze policy"));
+                return;
+            }
+
+            // Update insights section
+            if (data.success && data.result) {
+                const sections = data.result.sections;
+                const labels = data.labels; // Fetched from the API
+                
+                // Save sections and labels globally for eligibility check
+                window.currentAnalysisSections = sections;
+                window.currentLabels = labels;
+                
+                // Helper to format list items beautifully
+                const formatList = (items) => {
+                    if (!items || items.length === 0) return `<p class='premium-empty'>${labels.not_mentioned || 'Not mentioned in the policy.'}</p>`;
+                    if (items.length === 1 && items[0].includes("Not mentioned")) return `<p class='premium-empty'>${items[0]}</p>`;
+                    return "<ul class='premium-list'>" + items.map(item => `<li>${item}</li>`).join("") + "</ul>";
+                };
+
+                // Labels and icons for all 10 categories, using API labels for correct translation
+                const categoryMapping = [
+                    { key: "who_can_apply", icon: "👨‍🌾", title: labels.who_can_apply },
+                    { key: "benefits", icon: "💰", title: labels.benefits },
+                    { key: "documents", icon: "📑", title: labels.documents },
+                    { key: "how_to_apply", icon: "📝", title: labels.how_to_apply },
+                    { key: "dates", icon: "📅", title: labels.dates },
+                    { key: "conditions", icon: "⚠️", title: labels.conditions },
+                    { key: "exclusions", icon: "🚫", title: labels.exclusions },
+                    { key: "verification", icon: "✅", title: labels.verification },
+                    { key: "payment_method", icon: "💳", title: labels.payment_method },
+                    { key: "grievance", icon: "🎧", title: labels.grievance }
+                ];
+
+                // Update section headers translated
+                document.getElementById("inline-summary-title").innerText = labels.app_name + " Summary";
+                document.getElementById("inline-simple-exp-title").innerText = labels.simple_explanation;
+                document.getElementById("inline-elig-title").innerText = labels.eligibility_title;
+                document.getElementById("inline-btn-check").innerText = labels.check_btn;
+
+                // Update simple explanation
+                document.getElementById("inline-simple-explanation").innerText = data.result.simple_explanation || "No explanation available.";
+
+                // Build modern cards
+                let cardsHtml = "";
+                categoryMapping.forEach(cat => {
+                    cardsHtml += `
+                        <div class="premium-card">
+                            <div class="premium-card-icon">${cat.icon}</div>
+                            <h3>${cat.title}</h3>
+                            <div>${formatList(sections[cat.key])}</div>
+                        </div>
+                    `;
+                });
+
+                document.getElementById("inline-insight-grid").innerHTML = cardsHtml;
+                
+                // Reset eligibility result UI
+                const resDiv = document.getElementById('eligibility-result');
+                if(resDiv) {
+                    resDiv.style.display = 'none';
+                    resDiv.className = '';
+                }
+
+                // Show the result area and trigger animation
+                const resultArea = document.getElementById("analyzeResultArea");
+                resultArea.style.display = "block";
+                // Reset animation by removing and re-adding class
+                resultArea.classList.remove("premium-result-container");
+                void resultArea.offsetWidth; // trigger reflow
+                resultArea.classList.add("premium-result-container");
+                
+                // Scroll to results smoothly
+                resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+        } catch (error) {
+            console.error("API Error:", error);
+            alert("An error occurred while connecting to the server.");
+        } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+}
+
+function checkInlineEligibility() {
+    const fType = document.getElementById('farmerType').value;
+    const land = document.getElementById('landRecords').value;
+    const bank = document.getElementById('bankAcc').value;
+    
+    const resDiv = document.getElementById('eligibility-result');
+    resDiv.style.display = 'block';
+    resDiv.className = ''; // reset classes
+    
+    // Check global variables stored during analysis
+    const sections = window.currentAnalysisSections || {};
+    const labels = window.currentLabels || {};
+    const isMarathi = labels.app_name === "कृषी सरळ";
+    
+    const whoCanApplyText = (sections.who_can_apply || []).join(" ").toLowerCase();
+    const conditionsText = (sections.conditions || []).join(" ").toLowerCase();
+    const combinedRules = whoCanApplyText + " " + conditionsText;
+    
+    if (land === 'no' || bank === 'no') {
+      resDiv.classList.add('result-danger');
+      resDiv.innerHTML = isMarathi 
+          ? "❌ <strong>अपात्र:</strong> सरकारी योजनांसाठी वैध जमिनीचा दाखला आणि आधार-संलग्न बँक खाते अनिवार्य आहे."
+          : "❌ <strong>Not Eligible:</strong> Valid land records and an Aadhaar-linked bank account are strictly mandatory for almost all government schemes.";
+      return;
+    }
+    
+    // Check if policy restricts to small/marginal
+    const targetsSmallMarginal = combinedRules.includes("small") || combinedRules.includes("marginal") || combinedRules.includes("अल्प");
+    
+    if (targetsSmallMarginal && fType === 'large') {
+      resDiv.classList.add('result-warning');
+      resDiv.innerHTML = isMarathi
+          ? "⚠️ <strong>कमी शक्यता:</strong> या योजनेत अल्प आणि अत्यल्प भूधारकांना प्राधान्य दिले जाते. मोठ्या शेतकऱ्यांना लाभ मिळण्याची शक्यता कमी आहे."
+          : "⚠️ <strong>Low Chance:</strong> This specific policy prioritizes Small and Marginal farmers. Large farmers may not be covered.";
+      return;
+    }
+    
+    resDiv.classList.add('result-success');
+    resDiv.innerHTML = isMarathi
+        ? "✅ <strong>उच्च शक्यता:</strong> तुम्ही प्राथमिक अटी पूर्ण करता! अधिक माहितीसाठी 'अर्ज कसा करावा' विभाग वाचा."
+        : "✅ <strong>Highly Likely:</strong> You meet the primary criteria! Please read the 'How to Apply' section to proceed.";
+}
+
+function speakInlinePolicy() {
+    if (!('speechSynthesis' in window)) {
+        alert("Sorry, your browser doesn't support text-to-speech!");
+        return;
+    }
+    
+    const synth = window.speechSynthesis;
+    const btn = document.getElementById('speakBtn');
+    const btnText = btn.querySelector('span');
+    
+    // Determine language from global labels
+    const labels = window.currentLabels || {};
+    const policyLanguage = (labels.app_name === "कृषी सरळ") ? "mr-IN" : "en-IN";
+    
+    if (synth.speaking) {
+        synth.cancel(); // Stop if already playing
+        btnText.innerText = (policyLanguage === "mr-IN") ? "ऐका" : "Listen";
+        return;
+    }
+    
+    // Gather all text from simple explanation and cards
+    let textToRead = "";
+    
+    const simpleExpCard = document.querySelector('.premium-summary-card');
+    if (simpleExpCard) textToRead += simpleExpCard.innerText + ". ";
+    
+    document.querySelectorAll('.premium-card').forEach(card => {
+        textToRead += card.innerText + ". ";
+    });
+    
+    const utterance = new SpeechSynthesisUtterance(textToRead);
+    utterance.lang = policyLanguage;
+    utterance.rate = 0.9; // Slightly slower for clarity
+    
+    utterance.onend = function() {
+        btnText.innerText = (policyLanguage === "mr-IN") ? "ऐका" : "Listen";
+    };
+    
+    btnText.innerText = (policyLanguage === "mr-IN") ? "थांबवा" : "Stop Listening";
+    synth.speak(utterance);
 }
 
 </script>

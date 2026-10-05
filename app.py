@@ -16,7 +16,7 @@ Everything shown on the result page is either:
 No information is ever invented.
 """
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 
 from pdf_extractor import extract_text_from_pdf, PDFExtractionError
 from policy_analyzer import analyze_policy, NOT_MENTIONED
@@ -93,7 +93,8 @@ def home():
 
 @app.route("/analyze", methods=["POST"])
 def analyze():
-    language = request.form.get("language", "English")
+    lang_code = request.form.get("language", "en")
+    language = "Marathi" if lang_code == "mr" else "English"
     labels = get_labels(language)
 
     policy_text = ""
@@ -124,6 +125,35 @@ def analyze():
         language=language,
         result=result,
     )
+
+
+@app.route("/api/analyze", methods=["POST"])
+def api_analyze():
+    lang_code = request.form.get("language", "en")
+    language = "Marathi" if lang_code == "mr" else "English"
+    labels = get_labels(language)
+
+    policy_text = ""
+    error = None
+
+    uploaded_file = request.files.get("policy_pdf")
+    pasted_text = request.form.get("policy_text", "").strip()
+
+    if uploaded_file and uploaded_file.filename:
+        try:
+            policy_text = extract_text_from_pdf(uploaded_file.stream)
+        except PDFExtractionError as e:
+            error = str(e)
+    elif pasted_text:
+        policy_text = pasted_text
+    else:
+        error = "Please upload a PDF or paste some policy text before analyzing."
+
+    if error:
+        return jsonify({"error": error}), 400
+
+    result = _build_result(policy_text, language)
+    return jsonify({"success": True, "result": result, "labels": labels})
 
 
 if __name__ == "__main__":
