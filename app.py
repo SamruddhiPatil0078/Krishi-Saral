@@ -16,7 +16,16 @@ Everything shown on the result page is either:
 No information is ever invented.
 """
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
+import os
+import requests
+import json
+import uuid
+import tempfile
+from gtts import gTTS
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from pdf_extractor import extract_text_from_pdf, PDFExtractionError
 from policy_analyzer import analyze_policy, NOT_MENTIONED
@@ -155,6 +164,84 @@ def api_analyze():
     result = _build_result(policy_text, language)
     return jsonify({"success": True, "result": result, "labels": labels})
 
+
+@app.route("/api/chat", methods=["POST"])
+def api_chat():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid JSON"}), 400
+        
+    message = data.get("message", "")
+    context = data.get("context", "")
+    language = data.get("language", "English")
+
+    if not message:
+        return jsonify({"error": "Message is required"}), 400
+
+    if not context:
+        return jsonify({"error": "Please analyze a policy first so I have context to answer your questions."}), 400
+
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        return jsonify({"error": "GROQ_API_KEY is missing from the server environment."}), 500
+        
+    url = "https://api.groq.com/openai/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+
+    language_instruction = "Reply strictly in Marathi language." if language == "Marathi" else "Reply in simple English language."
+
+    system_message = (
+        "You are 'Krishi Assistant', a helpful AI assistant for farmers. "
+        "Answer questions strictly based on the provided policy context. "
+        "Keep your answers short, simple, and direct. "
+        "If the answer is not in the context, say 'I cannot find the answer in the policy document.' "
+        "Do not invent any information. " + language_instruction
+    )
+    user_message = f"Policy Context:\n{context}\n\nQuestion: {message}"
+
+    payload = {
+        "model": "openai/gpt-oss-20b", 
+        "messages": [
+            {"role": "system", "content": system_message},
+            {"role": "user", "content": user_message}
+        ],
+        "temperature": 0.3
+    }
+
+    try:
+        response = requests.post(url, headers=headers, json=payload)
+        if response.status_code == 200:
+            reply = response.json()['choices'][0]['message']['content']
+            return jsonify({"success": True, "reply": reply})
+        else:
+            return jsonify({"error": f"LLM API Error: {response.status_code}", "details": response.text}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/tts", methods=["POST"])
+def text_to_speech():
+    data = request.json
+    text = data.get("text", "")
+    lang = data.get("lang", "en")
+    
+    if not text:
+        return jsonify({"error": "No text provided"}), 400
+        
+    try:
+        temp_dir = tempfile.gettempdir()
+        filename = f"tts_{uuid.uuid4().hex}.mp3"
+        filepath = os.path.join(temp_dir, filename)
+        
+        tts = gTTS(text=text, lang=lang)
+        tts.save(filepath)
+        
+        return send_file(filepath, mimetype="audio/mpeg", as_attachment=False)
+    except Exception as e:
+        print("TTS Error:", e)
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=5000)

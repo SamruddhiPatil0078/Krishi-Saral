@@ -739,35 +739,29 @@
 
 
         <div class="voice-card">
-
             <div class="voice-circle">
                 🎙️
             </div>
-
-            <h2>Ask Krishi Saral</h2>
-
-            <p>
+            <h2 id="voiceTitle">Ask Krishi Saral</h2>
+            <p id="voiceSubtitle">
                 Press the microphone and speak your question.
             </p>
 
             <button class="mic-btn" id="voiceButton">
                 🎙️
             </button>
-
             <div id="voiceStatus" class="voice-status">
                 Click the microphone to start
             </div>
 
-            <div class="voice-result" id="voiceResult">
-                Your recognized question will appear here.
+            <div class="voice-result-box" id="voiceResultBox" style="display: none;">
+                <div class="voice-result-user" id="voiceUserQuestion"></div>
+                <div class="voice-result-bot" id="voiceBotAnswer"></div>
+                <button class="secondary-action" id="readAloudBtn" style="display: none;">
+                    🔊 <span>Read Answer Aloud</span>
+                </button>
             </div>
-
-            <button class="secondary-action">
-                🔊 Read Answer Aloud
-            </button>
-
         </div>
-
     </section>
 
 
@@ -814,7 +808,7 @@
 
             <div class="chat-input-area">
 
-                <button class="chat-mic">
+                <button class="chat-mic" id="chatMicBtn">
                     🎙️
                 </button>
 
@@ -1146,59 +1140,133 @@ if (ocrImage) {
 
 
 /* ============================================
-   VOICE RECOGNITION
-   Frontend browser feature
+   VOICE RECOGNITION (Standalone page)
    ============================================ */
 
 const voiceButton = document.getElementById("voiceButton");
-
-if (voiceButton && ("webkitSpeechRecognition" in window ||
-                    "SpeechRecognition" in window)) {
-
-    const SpeechRecognition =
-        window.SpeechRecognition ||
-        window.webkitSpeechRecognition;
-
+if (voiceButton && ("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
-
-    recognition.lang = "en-IN";
-
     recognition.continuous = false;
-
     recognition.interimResults = false;
 
+    const voiceStatus = document.getElementById("voiceStatus");
+    const voiceResultBox = document.getElementById("voiceResultBox");
+    const voiceUserQuestion = document.getElementById("voiceUserQuestion");
+    const voiceBotAnswer = document.getElementById("voiceBotAnswer");
+    const readAloudBtn = document.getElementById("readAloudBtn");
+    const readAloudText = readAloudBtn ? readAloudBtn.querySelector("span") : null;
 
     voiceButton.addEventListener("click", function() {
-
-        document.getElementById("voiceStatus").textContent =
-            "🎙️ Listening...";
-
+        if (window.speechSynthesis.speaking) window.speechSynthesis.cancel();
+        
+        voiceButton.classList.add("listening");
+        
+        const isMarathi = (window.currentLanguage === "mr");
+        recognition.lang = isMarathi ? "mr-IN" : "en-IN";
+        
+        voiceStatus.textContent = isMarathi ? "🎙️ ऐकत आहे..." : "🎙️ Listening...";
+        voiceResultBox.style.display = "none";
+        readAloudBtn.style.display = "none";
+        
         recognition.start();
-
     });
 
+    recognition.onresult = async function(event) {
+        voiceButton.classList.remove("listening");
+        const text = event.results[0][0].transcript;
+        
+        const isMarathi = (window.currentLanguage === "mr");
+        voiceStatus.textContent = isMarathi ? "⏳ विचार करत आहे..." : "⏳ Thinking...";
+        
+        voiceResultBox.style.display = "flex";
+        voiceUserQuestion.textContent = `"${text}"`;
+        voiceBotAnswer.innerHTML = "<em>...</em>";
 
-    recognition.onresult = function(event) {
+        try {
+            const language = isMarathi ? "Marathi" : "English";
+            const response = await fetch("/api/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    message: text,
+                    context: JSON.stringify(window.currentAnalysisSections || "No policy analyzed yet. Please analyze a policy first."),
+                    language: language
+                })
+            });
 
-        const text =
-            event.results[0][0].transcript;
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                voiceBotAnswer.textContent = data.reply;
+                voiceStatus.textContent = isMarathi ? "✅ उत्तर तयार आहे" : "✅ Answer ready";
+                
+                // Show Read Aloud button
+                readAloudBtn.style.display = "inline-flex";
+                if (readAloudText) {
+                    readAloudText.textContent = isMarathi ? "उत्तर मोठ्याने वाचा" : "Read Answer Aloud";
+                }
 
-        document.getElementById("voiceResult").textContent =
-            text;
+                let currentAudio = null;
 
-        document.getElementById("voiceStatus").textContent =
-            "Voice captured successfully.";
-
+                readAloudBtn.onclick = async () => {
+                    if (currentAudio) {
+                        currentAudio.pause();
+                        currentAudio = null;
+                        if (readAloudText) readAloudText.textContent = isMarathi ? "उत्तर मोठ्याने वाचा" : "Read Answer Aloud";
+                        return;
+                    }
+                    
+                    const originalText = readAloudText ? readAloudText.textContent : "Read";
+                    if (readAloudText) readAloudText.textContent = isMarathi ? "आवाज तयार करत आहे..." : "Generating Audio...";
+                    
+                    try {
+                        const ttsResponse = await fetch("/api/tts", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                text: data.reply,
+                                lang: isMarathi ? "mr" : "en"
+                            })
+                        });
+                        
+                        if (ttsResponse.ok) {
+                            const blob = await ttsResponse.blob();
+                            const url = URL.createObjectURL(blob);
+                            currentAudio = new Audio(url);
+                            currentAudio.onended = () => { 
+                                currentAudio = null; 
+                                if (readAloudText) readAloudText.textContent = originalText; 
+                            };
+                            currentAudio.play();
+                            if (readAloudText) readAloudText.textContent = isMarathi ? "थांबवा" : "Stop Audio";
+                        } else {
+                            if (readAloudText) readAloudText.textContent = originalText;
+                        }
+                    } catch(e) {
+                        console.error("TTS Error:", e);
+                        if (readAloudText) readAloudText.textContent = originalText;
+                    }
+                };
+                
+                // Auto-play the answer for illiterate farmers
+                readAloudBtn.click();
+            } else {
+                voiceBotAnswer.textContent = "Error: " + (data.error || "Unknown error");
+                voiceStatus.textContent = "❌ Error";
+            }
+        } catch (error) {
+            voiceBotAnswer.textContent = "Could not connect to the server.";
+            voiceStatus.textContent = "❌ Error";
+        }
     };
-
 
     recognition.onerror = function() {
-
-        document.getElementById("voiceStatus").textContent =
-            "Unable to recognize voice. Please try again.";
-
+        voiceButton.classList.remove("listening");
+        voiceStatus.textContent = (window.currentLanguage === "mr") 
+            ? "आवाज ओळखता आला नाही. पुन्हा प्रयत्न करा." 
+            : "Unable to recognize voice. Please try again.";
     };
-
 }
 
 
@@ -1230,37 +1298,100 @@ if (chatInput) {
 }
 
 
-function sendChatMessage() {
-
-    const input =
-        document.getElementById("chatInput");
-
-    const message =
-        input.value.trim();
+async function sendChatMessage() {
+    const input = document.getElementById("chatInput");
+    const message = input.value.trim();
 
     if (!message) {
         return;
     }
 
-    const chatMessages =
-        document.getElementById("chatMessages");
+    const chatMessages = document.getElementById("chatMessages");
 
-
-    const userMessage =
-        document.createElement("div");
-
+    // Add User Message
+    const userMessage = document.createElement("div");
     userMessage.className = "user-message";
-
     userMessage.textContent = message;
-
     chatMessages.appendChild(userMessage);
 
-
     input.value = "";
+    chatMessages.scrollTop = chatMessages.scrollHeight;
 
-    chatMessages.scrollTop =
-        chatMessages.scrollHeight;
+    // Add Loading Message
+    const loadingMessage = document.createElement("div");
+    loadingMessage.className = "bot-message";
+    loadingMessage.innerHTML = "<em>Thinking...</em>";
+    chatMessages.appendChild(loadingMessage);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
 
+    try {
+        const language = (window.currentLanguage === "mr") ? "Marathi" : "English";
+        
+        const response = await fetch("/api/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: message,
+                context: JSON.stringify(window.currentAnalysisSections || "No policy analyzed yet. Please ask the user to analyze a policy first."),
+                language: language
+            })
+        });
+
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            loadingMessage.textContent = data.reply;
+        } else {
+            loadingMessage.textContent = "Sorry, I ran into an error: " + (data.error || "Unknown error");
+        }
+    } catch (error) {
+        console.error("Chat API error", error);
+        loadingMessage.textContent = "Sorry, I could not connect to the server.";
+    }
+
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Chatbot Microphone Integration
+const chatMicBtn = document.getElementById("chatMicBtn");
+if (chatMicBtn && ("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const chatRecognition = new SpeechRecognition();
+    chatRecognition.continuous = false;
+    chatRecognition.interimResults = false;
+
+    chatMicBtn.addEventListener("click", function(e) {
+        e.preventDefault();
+        chatMicBtn.style.background = "#dcefdc";
+        chatMicBtn.innerHTML = "⏳";
+        
+        // Dynamically set language based on current UI language
+        chatRecognition.lang = (window.currentLanguage === "mr") ? "mr-IN" : "en-IN";
+        
+        chatRecognition.start();
+    });
+
+    chatRecognition.onresult = function(event) {
+        const text = event.results[0][0].transcript;
+        document.getElementById("chatInput").value = text;
+        
+        chatMicBtn.style.background = "transparent";
+        chatMicBtn.innerHTML = "🎙️";
+        
+        // Automatically send the transcribed message
+        sendChatMessage();
+    };
+
+    chatRecognition.onerror = function(event) {
+        chatMicBtn.style.background = "#fce8e6";
+        chatMicBtn.innerHTML = "❌";
+        setTimeout(() => {
+            chatMicBtn.style.background = "transparent";
+            chatMicBtn.innerHTML = "🎙️";
+        }, 2000);
+    };
 }
 
 
@@ -1269,27 +1400,35 @@ function sendChatMessage() {
    ============================================ */
 
 function changeLanguage(language) {
-
-    document.querySelectorAll(".language-btn")
-        .forEach(button => {
-
-            button.classList.remove("active");
-
-        });
+    window.currentLanguage = language;
+    
+    // Update sidebar buttons
+    document.querySelectorAll(".language-btn").forEach(button => {
+        button.classList.remove("active");
+    });
 
     if (language === "en") {
-
-        document.querySelectorAll(".language-btn")[0]
-            .classList.add("active");
-
+        document.querySelectorAll(".language-btn")[0].classList.add("active");
     } else {
-
-        document.querySelectorAll(".language-btn")[1]
-            .classList.add("active");
-
+        document.querySelectorAll(".language-btn")[1].classList.add("active");
     }
 
+    // Sync with the form radio buttons
+    const radioBtn = document.querySelector(`input[name="language"][value="${language}"]`);
+    if (radioBtn) {
+        radioBtn.checked = true;
+    }
 }
+
+// Ensure the form radio buttons also update the global language if clicked directly
+document.querySelectorAll('input[name="language"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+        changeLanguage(e.target.value);
+    });
+});
+
+// Initialize global language state
+window.currentLanguage = document.querySelector('input[name="language"]:checked')?.value || "en";
 
 /* ============================================
    API INTEGRATION FOR POLICY ANALYSIS
