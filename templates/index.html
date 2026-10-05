@@ -1,55 +1,1008 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Krishi Saral</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Krishi Saral</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
 </head>
+
 <body>
-  <header class="top">
-    <h1>{{ labels.app_name }}</h1>
-    <p class="tagline">{{ labels.tagline }}</p>
-  </header>
 
-  <div class="container">
-    <p class="description">
-      Upload a government agricultural policy and understand it in simple language.
-    </p>
+<!-- ================= SIDEBAR ================= -->
 
-    {% if error %}
-      <div class="error-box">{{ error }}</div>
-    {% endif %}
+<aside class="sidebar" id="sidebar">
 
-    <form action="/analyze" method="POST" enctype="multipart/form-data">
+    <div class="brand">
+        <div class="brand-icon">🌾</div>
 
-      <div class="card">
-        <p class="option-title">Upload Policy PDF</p>
-        <input type="file" name="policy_pdf" accept="application/pdf" />
-      </div>
+        <div>
+            <h2>Krishi Saral</h2>
+            <p>कृषी माहिती सोपी करा</p>
+        </div>
+    </div>
 
-      <div class="divider">— OR —</div>
+    <nav class="sidebar-nav">
 
-      <div class="card">
-        <p class="option-title">Paste Policy Text</p>
-        <textarea name="policy_text" placeholder="Paste the policy text here..."></textarea>
-      </div>
+        <a href="#home" class="nav-item active" data-section="home">
+            <span class="nav-icon">🏠</span>
+            <span>Home</span>
+        </a>
 
-      <div class="language-select">
-        <label>
-          <input type="radio" name="language" value="English" checked />
-          <span>English</span>
-        </label>
-        <label>
-          <input type="radio" name="language" value="Marathi" />
-          <span>मराठी</span>
-        </label>
-      </div>
+        <a href="#analyze" class="nav-item" data-section="analyze">
+            <span class="nav-icon">📄</span>
+            <span>Analyze Policy</span>
+        </a>
 
-      <button type="submit" class="big-button">Analyze Policy</button>
-    </form>
+        <a href="#ocr" class="nav-item" data-section="ocr">
+            <span class="nav-icon">📷</span>
+            <span>Image / OCR</span>
+        </a>
 
-    <footer class="note">No login required. Your document is only used to generate this explanation.</footer>
-  </div>
+        <a href="#voice" class="nav-item" data-section="voice">
+            <span class="nav-icon">🎙️</span>
+            <span>Voice Assistant</span>
+        </a>
+
+        <a href="#chatbot" class="nav-item" data-section="chatbot">
+            <span class="nav-icon">🤖</span>
+            <span>Policy Chatbot</span>
+        </a>
+
+        <a href="#insights" class="nav-item" data-section="insights">
+            <span class="nav-icon">💡</span>
+            <span>Policy Insights</span>
+        </a>
+
+        <a href="#analytics" class="nav-item" data-section="analytics">
+            <span class="nav-icon">📊</span>
+            <span>Analytics</span>
+        </a>
+
+        <a href="#compare" class="nav-item" data-section="compare">
+            <span class="nav-icon">🔍</span>
+            <span>Compare Policies</span>
+        </a>
+
+    </nav>
+
+    <div class="sidebar-bottom">
+
+        <div class="language-title">
+            🌐 Language
+        </div>
+
+        <div class="language-switch">
+            <button class="language-btn active" onclick="changeLanguage('en')">
+                English
+            </button>
+
+            <button class="language-btn" onclick="changeLanguage('mr')">
+                मराठी
+            </button>
+        </div>
+
+    </div>
+
+</aside>
+
+
+<!-- MOBILE MENU -->
+
+<button class="mobile-menu" id="mobileMenu">
+    ☰
+</button>
+
+
+<!-- ================= MAIN CONTENT ================= -->
+
+<main class="main-content">
+
+    <!-- HOME -->
+
+    <section class="page-section active" id="home">
+
+        <div class="welcome-header">
+            <span class="small-label">🌱 Farmer Friendly • Simple • Accessible</span>
+
+            <h1>
+                Understand Government<br>
+                Agricultural Policies
+            </h1>
+
+            <p>
+                Krishi Saral helps farmers understand complicated
+                government agricultural policies in simple language.
+            </p>
+
+            <div class="hero-buttons">
+
+                <a href="#analyze"
+                   class="primary-btn"
+                   data-go="analyze">
+                    📄 Analyze a Policy
+                </a>
+
+                <a href="#voice"
+                   class="secondary-btn"
+                   data-go="voice">
+                    🎙️ Ask by Voice
+                </a>
+
+            </div>
+        </div>
+
+
+        <!-- QUICK ACCESS -->
+
+        <div class="section-heading">
+            <span>WHAT YOU CAN DO</span>
+            <h2>Everything You Need in One Place</h2>
+        </div>
+
+
+        <div class="feature-grid">
+
+            <div class="feature-card" data-go="analyze">
+
+                <div class="feature-icon">📄</div>
+
+                <h3>Analyze Policy</h3>
+
+                <p>
+                    Upload a government policy PDF or paste
+                    policy text and get a simple explanation.
+                </p>
+
+                <button class="card-link">
+                    Analyze now →
+                </button>
+
+            </div>
+
+
+            <div class="feature-card" data-go="ocr">
+
+                <div class="feature-icon">📷</div>
+
+                <h3>Image / OCR</h3>
+
+                <p>
+                    Extract information from government notices,
+                    pamphlets and policy images.
+                </p>
+
+                <button class="card-link">
+                    Extract text →
+                </button>
+
+            </div>
+
+
+            <div class="feature-card" data-go="voice">
+
+                <div class="feature-icon">🎙️</div>
+
+                <h3>Voice Assistant</h3>
+
+                <p>
+                    Use your voice to ask questions and understand
+                    agricultural information.
+                </p>
+
+                <button class="card-link">
+                    Try voice →
+                </button>
+
+            </div>
+
+
+            <div class="feature-card" data-go="chatbot">
+
+                <div class="feature-icon">🤖</div>
+
+                <h3>Policy Chatbot</h3>
+
+                <p>
+                    Ask questions about an agricultural policy
+                    in simple language.
+                </p>
+
+                <button class="card-link">
+                    Ask chatbot →
+                </button>
+
+            </div>
+
+
+            <div class="feature-card" data-go="insights">
+
+                <div class="feature-icon">💡</div>
+
+                <h3>Policy Insights</h3>
+
+                <p>
+                    Quickly understand eligibility, benefits,
+                    documents and important conditions.
+                </p>
+
+                <button class="card-link">
+                    View insights →
+                </button>
+
+            </div>
+
+
+            <div class="feature-card" data-go="analytics">
+
+                <div class="feature-icon">📊</div>
+
+                <h3>Analytics</h3>
+
+                <p>
+                    View useful statistics about analyzed policies,
+                    languages and user activity.
+                </p>
+
+                <button class="card-link">
+                    View analytics →
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= ANALYZE POLICY ================= -->
+
+    <section class="page-section" id="analyze">
+
+        <div class="page-title">
+
+            <div class="title-icon">📄</div>
+
+            <div>
+                <h1>Analyze Policy</h1>
+
+                <p>
+                    Upload a government agricultural policy
+                    or paste its text.
+                </p>
+            </div>
+
+        </div>
+
+
+        <form action="/analyze" method="POST" enctype="multipart/form-data">
+
+            <div class="form-card">
+
+                <div class="form-section">
+
+                    <h3>Upload Policy PDF</h3>
+
+                    <label class="upload-box">
+
+                        <div class="upload-icon">📄</div>
+
+                        <strong>Choose a PDF file</strong>
+
+                        <span>
+                            Upload your government policy document
+                        </span>
+
+                        <input
+                            type="file"
+                            name="policy_pdf"
+                            accept=".pdf"
+                        >
+
+                    </label>
+
+                </div>
+
+
+                <div class="or-divider">
+                    <span>OR</span>
+                </div>
+
+
+                <div class="form-section">
+
+                    <h3>Paste Policy Text</h3>
+
+                    <textarea
+                        name="policy_text"
+                        placeholder="Paste the policy text here..."
+                    ></textarea>
+
+                </div>
+
+
+                <div class="form-section">
+
+                    <h3>Select Language</h3>
+
+                    <div class="language-options">
+
+                        <label>
+                            <input
+                                type="radio"
+                                name="language"
+                                value="en"
+                                checked
+                            >
+                            <span>English</span>
+                        </label>
+
+                        <label>
+                            <input
+                                type="radio"
+                                name="language"
+                                value="mr"
+                            >
+                            <span>मराठी</span>
+                        </label>
+
+                    </div>
+
+                </div>
+
+
+                <button type="submit" class="analyze-btn">
+                    🔎 Analyze Policy
+                </button>
+
+            </div>
+
+        </form>
+
+    </section>
+
+
+    <!-- ================= IMAGE / OCR ================= -->
+
+    <section class="page-section" id="ocr">
+
+        <div class="page-title">
+
+            <div class="title-icon">📷</div>
+
+            <div>
+                <h1>Image / OCR</h1>
+
+                <p>
+                    Extract text from government notices,
+                    pamphlets and policy images.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="form-card">
+
+            <label class="upload-box large-upload">
+
+                <div class="upload-icon">📷</div>
+
+                <h3>Upload an Image</h3>
+
+                <span>
+                    JPG, JPEG or PNG
+                </span>
+
+                <input
+                    type="file"
+                    id="ocrImage"
+                    accept="image/*"
+                >
+
+            </label>
+
+
+            <div id="imagePreviewContainer" class="image-preview-container">
+
+                <img id="imagePreview" alt="Image Preview">
+
+            </div>
+
+
+            <div class="placeholder-box">
+
+                <div>📝</div>
+
+                <h3>Extracted Text</h3>
+
+                <p>
+                    Extracted text will appear here after OCR processing.
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= VOICE ================= -->
+
+    <section class="page-section" id="voice">
+
+        <div class="page-title">
+
+            <div class="title-icon">🎙️</div>
+
+            <div>
+                <h1>Voice Assistant</h1>
+
+                <p>
+                    Ask your agricultural questions using your voice.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="voice-card">
+
+            <div class="voice-circle">
+                🎙️
+            </div>
+
+            <h2>Ask Krishi Saral</h2>
+
+            <p>
+                Press the microphone and speak your question.
+            </p>
+
+            <button class="mic-btn" id="voiceButton">
+                🎙️
+            </button>
+
+            <div id="voiceStatus" class="voice-status">
+                Click the microphone to start
+            </div>
+
+            <div class="voice-result" id="voiceResult">
+                Your recognized question will appear here.
+            </div>
+
+            <button class="secondary-action">
+                🔊 Read Answer Aloud
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= CHATBOT ================= -->
+
+    <section class="page-section" id="chatbot">
+
+        <div class="page-title">
+
+            <div class="title-icon">🤖</div>
+
+            <div>
+                <h1>Policy Chatbot</h1>
+
+                <p>
+                    Ask questions about the agricultural policy.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="chat-card">
+
+            <div class="chat-header">
+                <div class="bot-avatar">🤖</div>
+
+                <div>
+                    <strong>Krishi Assistant</strong>
+                    <span>Ask in English or Marathi</span>
+                </div>
+            </div>
+
+
+            <div class="chat-messages" id="chatMessages">
+
+                <div class="bot-message">
+                    👋 Hello! Ask me about the policy,
+                    eligibility, benefits or documents.
+                </div>
+
+            </div>
+
+
+            <div class="chat-input-area">
+
+                <button class="chat-mic">
+                    🎙️
+                </button>
+
+                <input
+                    type="text"
+                    id="chatInput"
+                    placeholder="Ask your question..."
+                >
+
+                <button class="send-btn" id="sendMessage">
+                    ➤
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= INSIGHTS ================= -->
+
+    <section class="page-section" id="insights">
+
+        <div class="page-title">
+
+            <div class="title-icon">💡</div>
+
+            <div>
+                <h1>Policy Insights</h1>
+
+                <p>
+                    Important information from the analyzed policy.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="insight-grid">
+
+            <div class="insight-card">
+                <span>👨‍🌾</span>
+                <h3>Who Can Apply?</h3>
+                <p>Not analyzed yet.</p>
+            </div>
+
+            <div class="insight-card">
+                <span>💰</span>
+                <h3>Financial Benefit</h3>
+                <p>Not analyzed yet.</p>
+            </div>
+
+            <div class="insight-card">
+                <span>📅</span>
+                <h3>Important Dates</h3>
+                <p>Not analyzed yet.</p>
+            </div>
+
+            <div class="insight-card">
+                <span>📑</span>
+                <h3>Required Documents</h3>
+                <p>Not analyzed yet.</p>
+            </div>
+
+            <div class="insight-card">
+                <span>📝</span>
+                <h3>Application Method</h3>
+                <p>Not analyzed yet.</p>
+            </div>
+
+            <div class="insight-card">
+                <span>⚠️</span>
+                <h3>Important Conditions</h3>
+                <p>Not analyzed yet.</p>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= ANALYTICS ================= -->
+
+    <section class="page-section" id="analytics">
+
+        <div class="page-title">
+
+            <div class="title-icon">📊</div>
+
+            <div>
+                <h1>Analytics</h1>
+
+                <p>
+                    Overview of policy analysis activity.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="stats-grid">
+
+            <div class="stat-card">
+                <span>📄</span>
+                <strong>0</strong>
+                <p>Policies Analyzed</p>
+            </div>
+
+            <div class="stat-card">
+                <span>📷</span>
+                <strong>0</strong>
+                <p>Images Processed</p>
+            </div>
+
+            <div class="stat-card">
+                <span>💬</span>
+                <strong>0</strong>
+                <p>Questions Asked</p>
+            </div>
+
+            <div class="stat-card">
+                <span>🎙️</span>
+                <strong>0</strong>
+                <p>Voice Queries</p>
+            </div>
+
+        </div>
+
+
+        <div class="analytics-placeholder">
+
+            <div class="chart-icon">📈</div>
+
+            <h3>Analytics Dashboard</h3>
+
+            <p>
+                Detailed charts and statistics will appear here
+                when connected with the backend.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- ================= COMPARE ================= -->
+
+    <section class="page-section" id="compare">
+
+        <div class="page-title">
+
+            <div class="title-icon">🔍</div>
+
+            <div>
+                <h1>Compare Policies</h1>
+
+                <p>
+                    Compare two agricultural policies side by side.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="compare-select">
+
+            <div class="select-card">
+
+                <label>Policy 1</label>
+
+                <select>
+                    <option>Select a policy</option>
+                </select>
+
+            </div>
+
+
+            <div class="vs">
+                VS
+            </div>
+
+
+            <div class="select-card">
+
+                <label>Policy 2</label>
+
+                <select>
+                    <option>Select a policy</option>
+                </select>
+
+            </div>
+
+        </div>
+
+
+        <div class="compare-placeholder">
+
+            <div>🔍</div>
+
+            <h3>Policy Comparison</h3>
+
+            <p>
+                Select two policies to compare eligibility,
+                benefits, documents and important conditions.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <footer>
+        🌾 Krishi Saral • Making Government Policies Simple for Farmers
+    </footer>
+
+</main>
+
+
+<script>
+
+/* ============================================
+   SECTION NAVIGATION
+   ============================================ */
+
+const navItems = document.querySelectorAll(".nav-item");
+const sections = document.querySelectorAll(".page-section");
+const goButtons = document.querySelectorAll("[data-go]");
+
+function showSection(sectionId) {
+
+    sections.forEach(section => {
+        section.classList.remove("active");
+    });
+
+    const selectedSection = document.getElementById(sectionId);
+
+    if (selectedSection) {
+        selectedSection.classList.add("active");
+    }
+
+    navItems.forEach(item => {
+        item.classList.remove("active");
+
+        if (item.dataset.section === sectionId) {
+            item.classList.add("active");
+        }
+    });
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+    document.getElementById("sidebar").classList.remove("open");
+}
+
+
+navItems.forEach(item => {
+
+    item.addEventListener("click", function(event) {
+
+        event.preventDefault();
+
+        showSection(this.dataset.section);
+
+    });
+
+});
+
+
+goButtons.forEach(button => {
+
+    button.addEventListener("click", function() {
+
+        showSection(this.dataset.go);
+
+    });
+
+});
+
+
+/* ============================================
+   MOBILE SIDEBAR
+   ============================================ */
+
+document.getElementById("mobileMenu").addEventListener("click", function() {
+
+    document.getElementById("sidebar").classList.toggle("open");
+
+});
+
+
+/* ============================================
+   IMAGE PREVIEW
+   ============================================ */
+
+const ocrImage = document.getElementById("ocrImage");
+
+if (ocrImage) {
+
+    ocrImage.addEventListener("change", function() {
+
+        const file = this.files[0];
+
+        if (!file) {
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function(event) {
+
+            const preview = document.getElementById("imagePreview");
+
+            preview.src = event.target.result;
+
+            document.getElementById(
+                "imagePreviewContainer"
+            ).style.display = "block";
+
+        };
+
+        reader.readAsDataURL(file);
+
+    });
+
+}
+
+
+/* ============================================
+   VOICE RECOGNITION
+   Frontend browser feature
+   ============================================ */
+
+const voiceButton = document.getElementById("voiceButton");
+
+if (voiceButton && ("webkitSpeechRecognition" in window ||
+                    "SpeechRecognition" in window)) {
+
+    const SpeechRecognition =
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition;
+
+    const recognition = new SpeechRecognition();
+
+    recognition.lang = "en-IN";
+
+    recognition.continuous = false;
+
+    recognition.interimResults = false;
+
+
+    voiceButton.addEventListener("click", function() {
+
+        document.getElementById("voiceStatus").textContent =
+            "🎙️ Listening...";
+
+        recognition.start();
+
+    });
+
+
+    recognition.onresult = function(event) {
+
+        const text =
+            event.results[0][0].transcript;
+
+        document.getElementById("voiceResult").textContent =
+            text;
+
+        document.getElementById("voiceStatus").textContent =
+            "Voice captured successfully.";
+
+    };
+
+
+    recognition.onerror = function() {
+
+        document.getElementById("voiceStatus").textContent =
+            "Unable to recognize voice. Please try again.";
+
+    };
+
+}
+
+
+/* ============================================
+   CHATBOT FRONTEND
+   ============================================ */
+
+const sendMessage = document.getElementById("sendMessage");
+
+if (sendMessage) {
+
+    sendMessage.addEventListener("click", sendChatMessage);
+
+}
+
+
+const chatInput = document.getElementById("chatInput");
+
+if (chatInput) {
+
+    chatInput.addEventListener("keypress", function(event) {
+
+        if (event.key === "Enter") {
+            sendChatMessage();
+        }
+
+    });
+
+}
+
+
+function sendChatMessage() {
+
+    const input =
+        document.getElementById("chatInput");
+
+    const message =
+        input.value.trim();
+
+    if (!message) {
+        return;
+    }
+
+    const chatMessages =
+        document.getElementById("chatMessages");
+
+
+    const userMessage =
+        document.createElement("div");
+
+    userMessage.className = "user-message";
+
+    userMessage.textContent = message;
+
+    chatMessages.appendChild(userMessage);
+
+
+    input.value = "";
+
+    chatMessages.scrollTop =
+        chatMessages.scrollHeight;
+
+}
+
+
+/* ============================================
+   LANGUAGE BUTTON
+   ============================================ */
+
+function changeLanguage(language) {
+
+    document.querySelectorAll(".language-btn")
+        .forEach(button => {
+
+            button.classList.remove("active");
+
+        });
+
+    if (language === "en") {
+
+        document.querySelectorAll(".language-btn")[0]
+            .classList.add("active");
+
+    } else {
+
+        document.querySelectorAll(".language-btn")[1]
+            .classList.add("active");
+
+    }
+
+}
+
+</script>
+
 </body>
 </html>
